@@ -19,8 +19,10 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     dt: time step
     t_final: final time
     method: either "euler" or "rk2" or "rk4"
-    plot_vars: variables to plot against time
+    plot_vars: list of variables to plot against time 
+               (for scalar equation, leave blank)
     phase_vars: variables to plot in phase diagram (list of ordered pairs)
+                (for scalar equation, leave blank)
     
     Results
     Plots the time series of chosen variables
@@ -32,11 +34,20 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     
     n = int(t_final / dt) #number of steps to take, total points is n + 1
     
-    u = u_0.copy()
-    u_list = np.empty( (n + 1, len(u_0)) )
+    if isinstance(u_0, float):
+        u = u_0
+        u_list = np.empty( n + 1 )
+    elif isinstance(u_0, np.ndarray):
+        u = u_0.copy()
+        u_list = np.empty( (n + 1, len(u_0)) )
+    else:
+        raise Exception("Initial condition must be float or np.ndarray of floats")
+    
     t_list = np.linspace(0, t_final, n + 1)
     u_list[0] = u_0
     
+    #==================================
+    #Integration Algorithms
     if method == "euler":
         for i in range(n):
             u += f(t_list[i], u) * dt
@@ -83,21 +94,33 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
             
     else:
         raise Exception("Enter \"euler\", \"midpoint\", \"trapezoid\", \"ralston\", \"classic_rk4\" or \"equal_rk4\"")
-        
-    fig = plt.figure( figsize = (24,12) )
-    axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+    #==================================
+       
     
-    for i, var in enumerate(plot_vars):
-        axes[0, i].plot(t_list, u_list[:,var])
-        axes[0, i].set_title("Time series for x" + str(var))
-        axes[0, i].set_xlabel("t")
-        axes[0, i].set_ylabel("x" + str(var))
-        
-    for i, var in enumerate(phase_vars):
-        axes[1, i].plot(u_list[:,var[0]], u_list[:,var[1]])
-        axes[1, i].set_xlabel("x" + str(var[0]))
-        axes[1, i].set_ylabel("y" + str(var[1]))
-        axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+    
+    fig = plt.figure( figsize = (24,12) )
+    
+    if isinstance(u_0, float): #can only plot solution x over time t
+        if plot_vars: #list is not empty, meaning we have a variable to plot
+            axes = fig.subplots(1,1)
+            axes.plot(t_list, u_list)
+            axes.set_title("Time series for x")
+            axes.set_xlabel("t")
+            axes.set_ylabel("x")
+    
+    elif isinstance(u_0, np.ndarray):
+        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+        for i, var in enumerate(plot_vars):
+            axes[0, i].plot(t_list, u_list[:,var])
+            axes[0, i].set_title("Time series for x" + str(var))
+            axes[0, i].set_xlabel("t")
+            axes[0, i].set_ylabel("x" + str(var))
+            
+        for i, var in enumerate(phase_vars):
+            axes[1, i].plot(u_list[:,var[0]], u_list[:,var[1]])
+            axes[1, i].set_xlabel("x" + str(var[0]))
+            axes[1, i].set_ylabel("y" + str(var[1]))
+            axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     
     return u_list
 
@@ -206,23 +229,37 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     
     n = int(t_final / dt)
     fig = plt.figure( figsize = (24,12) )
-    axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
     t_list = np.linspace(0, t_final, n + 1)
-    u_list = np.empty( (len(u_0_list), n + 1, len(u_0_list[0])) )
     
-    for i, u_0 in enumerate(u_0_list):
-        u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
+    if isinstance(u_0_list[0], float):
+        u_list = np.empty( (len(u_0_list), n+1) )
+        axes = fig.subplots(1, 1)
         
-        for j, var in enumerate(plot_vars):
-            axes[0, j].plot(t_list, u_list[i,:,var])
-            axes[0, j].set_title("Time series for x" + str(var))
-            axes[0, j].set_xlabel("t")
-            axes[0, j].set_ylabel("x" + str(var))
+        for i, u_0 in enumerate(u_0_list):
+            u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
+
+            axes.plot(t_list, u_list[i,:])
+            axes.set_title("Time series for x")
+            axes.set_xlabel("t")
+            axes.set_ylabel("x")
         
-        for j, var in enumerate(phase_vars):
-            axes[1, j].plot(u_list[i,:,var[0]], u_list[i,:,var[1]])
-            axes[1, j].set_xlabel("x" + str(var[0]))
-            axes[1, j].set_ylabel("y" + str(var[1]))
-            axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+    elif isinstance(u_0_list[0], np.ndarray):
+        u_list = np.empty( (len(u_0_list), n + 1, len(u_0_list[0])) )
+        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+        
+        for i, u_0 in enumerate(u_0_list):
+            u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
+            
+            for j, var in enumerate(plot_vars):
+                axes[0, j].plot(t_list, u_list[i,:,var])
+                axes[0, j].set_title("Time series for x" + str(var))
+                axes[0, j].set_xlabel("t")
+                axes[0, j].set_ylabel("x" + str(var))
+            
+            for j, var in enumerate(phase_vars):
+                axes[1, j].plot(u_list[i,:,var[0]], u_list[i,:,var[1]])
+                axes[1, j].set_xlabel("x" + str(var[0]))
+                axes[1, j].set_ylabel("y" + str(var[1]))
+                axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
             
     return u_list

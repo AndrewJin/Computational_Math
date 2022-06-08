@@ -19,6 +19,10 @@ def main():
     #Run the algorithm
     ivp.solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars)
     
+    #with different initial values
+    u_0_list = [0.1, 0.2, 0.3, 0.4, 0.5]
+    ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)
+    
     
     
 if __name__ == "__main__":
