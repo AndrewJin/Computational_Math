@@ -126,6 +126,9 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     
     return u_list
 
+
+
+
 def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -145,10 +148,14 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     Plots the 2D phase space of chosen variable pairs
     
     Returns
-    u_list: array of ordered tuples representing solution at each time
+    u_list: deque of ordered tuples representing solution at each time
     """
     
-    u = u_0
+    if isinstance(u_0, float):
+        u = u_0
+    elif isinstance(u_0, np.ndarray):
+        u = u_0.copy()
+        
     t = 0
     u_list = deque()
     t_list = deque()
@@ -160,46 +167,68 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
         #First, attempt a step using a dt_trial
         
         #Use midpoint method for dt^3 step error
-        k1 = f(t_list[-1], u) * dt_trial #step size from initial point
-        k2 = f(t_list[-1] + dt_trial/2, u + k1/2) * dt_trial #step size from midpoint, estimate midpoint using initial point
+        k1 = f(t, u) * dt_trial #step size from initial point
+        k2 = f(t + dt_trial/2, u + k1/2) * dt_trial #step size from midpoint, estimate midpoint using initial point
         u_rk2 = u + k2
         
         #Use equal_rk4 method for dt^5 step error
-        k1 = f(t_list[-1], u) * dt_trial
-        k2 = f(t_list[-1] + dt_trial/3, u + k1/3) * dt_trial
-        k3 = f(t_list[-1] + 2*dt_trial/3, u - k1/3 + k2) * dt_trial
-        k4 = f(t_list[-1] + dt_trial, u + k1 - k2 + k3) * dt_trial
+        k1 = f(t, u) * dt_trial
+        k2 = f(t + dt_trial/3, u + k1/3) * dt_trial
+        k3 = f(t + 2*dt_trial/3, u - k1/3 + k2) * dt_trial
+        k4 = f(t + dt_trial, u + k1 - k2 + k3) * dt_trial
         u_rk4 = u + k1/8 + 3*k2/8 + 3*k3/8 + k4/8
         
-        err_current = abs(u_rk4 - u_rk2)
+        err_current = np.linalg.norm(u_rk4 - u_rk2)
         
         #Revise dt based on error
         dt = dt_trial * (err_target / err_current) ** (1/3)
         
         #Now, make step using the adaptive dt
-        k1 = f(t_list[-1], u) * dt
-        k2 = f(t_list[-1] + dt/3, u + k1/3) * dt
-        k3 = f(t_list[-1] + 2*dt/3, u - k1/3 + k2) * dt
-        k4 = f(t_list[-1] + dt, u + k1 - k2 + k3) * dt
+        k1 = f(t, u) * dt
+        k2 = f(t + dt/3, u + k1/3) * dt
+        k3 = f(t + 2*dt/3, u - k1/3 + k2) * dt
+        k4 = f(t + dt, u + k1 - k2 + k3) * dt
         u += k1/8 + 3*k2/8 + 3*k3/8 + k4/8
-        u_list.append(u)
+        
+        if isinstance(u_0, float):
+            u_list.append(u)
+        elif isinstance(u_0, np.ndarray):
+            u_list.append(u.copy())
         
         t += dt
         t_list.append(t)
         
         dt_trial = dt
-        
 
-    if plot_vars: #list is not empty, meaning we have a variable to plot
-        fig = plt.figure( figsize = (24,12) )
-        axes = fig.subplots(1,1)
-        axes.plot(t_list, u_list)
-        axes.set_title("Time series for x")
-        axes.set_xlabel("t")
-        axes.set_ylabel("x")
+    fig = plt.figure( figsize = (24,12) )
+    
+    if isinstance(u_0, float):
+        if plot_vars: #list is not empty, meaning we have a variable to plot
+            fig = plt.figure( figsize = (24,12) )
+            axes = fig.subplots(1,1)
+            axes.plot(t_list, u_list)
+            axes.set_title("Time series for x")
+            axes.set_xlabel("t")
+            axes.set_ylabel("x")
+            
+    elif isinstance(u_0, np.ndarray):
+        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+        for i, var in enumerate(plot_vars):
+            axes[0, i].plot(t_list, [u[var] for u in u_list])
+            axes[0, i].set_title("Time series for x" + str(var))
+            axes[0, i].set_xlabel("t")
+            axes[0, i].set_ylabel("x" + str(var))
+            
+        for i, var in enumerate(phase_vars):
+            axes[1, i].plot([u[var[0]] for u in u_list], [u[var[1]] for u in u_list])
+            axes[1, i].set_xlabel("x" + str(var[0]))
+            axes[1, i].set_ylabel("y" + str(var[1]))
+            axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     
     return t_list, u_list
-        
+ 
+
+       
 
 def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     """

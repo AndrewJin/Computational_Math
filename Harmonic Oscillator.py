@@ -21,6 +21,10 @@ def main():
     #Run the algorithm
     ivp.solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars)
     
+    #With adaptive time step
+    err_target = 1e-6
+    ivp.adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars)
+    
     #With different initial values
     u_0_list = [np.array([np.pi / 4, 0]), np.array([np.pi / 2, 0]), np.array([3 * np.pi / 4, 0])]
     ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)
