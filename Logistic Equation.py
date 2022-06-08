@@ -23,6 +23,11 @@ def main():
     u_0_list = [0.1, 0.2, 0.3, 0.4, 0.5]
     ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)
     
+    #Using adaptive solver
+    err_target = 1e-6
+    t_list, u_list = ivp.adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars)
+    print(t_list)
+    
     
     
 if __name__ == "__main__":

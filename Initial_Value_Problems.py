@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-#TO DO: MAKE SOLVE_IVP WORK FOR SCALAR EQUATIONS
+#TO DO: REVISE ADAPTIVE IVP SOLVER
 
 def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     """
@@ -97,7 +97,8 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     #==================================
        
     
-    
+    #==================================
+    #Graphing
     fig = plt.figure( figsize = (24,12) )
     
     if isinstance(u_0, float): #can only plot solution x over time t
@@ -121,6 +122,7 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
             axes[1, i].set_xlabel("x" + str(var[0]))
             axes[1, i].set_ylabel("y" + str(var[1]))
             axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+    #==================================
     
     return u_list
 
@@ -146,7 +148,7 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     u_list: array of ordered tuples representing solution at each time
     """
     
-    u = u_0.copy()
+    u = u_0
     t = 0
     u_list = deque()
     t_list = deque()
@@ -172,7 +174,7 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
         err_current = abs(u_rk4 - u_rk2)
         
         #Revise dt based on error
-        dt = dt_trial * (err_target / err_current) ** 1/3
+        dt = dt_trial * (err_target / err_current) ** (1/3)
         
         #Now, make step using the adaptive dt
         k1 = f(t_list[-1], u) * dt
@@ -187,21 +189,15 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
         
         dt_trial = dt
         
-    fig = plt.figure( figsize = (24,12) )
-    axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+
+    if plot_vars: #list is not empty, meaning we have a variable to plot
+        fig = plt.figure( figsize = (24,12) )
+        axes = fig.subplots(1,1)
+        axes.plot(t_list, u_list)
+        axes.set_title("Time series for x")
+        axes.set_xlabel("t")
+        axes.set_ylabel("x")
     
-    for i, var in enumerate(plot_vars):
-        axes[0, i].plot(t_list, u_list[:,var])
-        axes[0, i].set_title("Time series for x" + str(var))
-        axes[0, i].set_xlabel("t")
-        axes[0, i].set_ylabel("x" + str(var))
-        
-    for i, var in enumerate(phase_vars):
-        axes[1, i].plot(u_list[:,var[0]], u_list[:,var[1]])
-        axes[1, i].set_xlabel("x" + str(var[0]))
-        axes[1, i].set_ylabel("y" + str(var[1]))
-        axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
-        
     return t_list, u_list
         
 
