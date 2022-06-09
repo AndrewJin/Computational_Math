@@ -25,9 +25,7 @@ def main():
     #With adaptive time step
     err_target = 1e-4
     t_list, u_list = ivp.adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars)
-    print(t_list)
     dt_list = [t_list[i + 1] - t_list[i] for i in range(0, len(t_list) - 1)]
-    print(dt_list)
     
     #With different initial values, using adaptive time step
     u_0_list = [np.array([1., 0.]), np.array([1.5, 0.]), np.array([2., 0.])]

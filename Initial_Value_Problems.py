@@ -1,5 +1,6 @@
 """
 Computational Math Module 5: Initial Value Problems
+Functions: solve_ivp, adaptive_ivp, compare_ivp
 """
 
 import numpy as np
@@ -8,7 +9,8 @@ from collections import deque
 
 
 
-
+#==========================================================
+#==========================================================
 def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -126,10 +128,14 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     #==================================
     
     return u_list
+#==========================================================
+#==========================================================
 
 
 
 
+#==========================================================
+#==========================================================
 def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -227,10 +233,14 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
             axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     
     return t_list, u_list
- 
+#==========================================================
+#==========================================================
+
+
 
        
-
+#==========================================================
+#==========================================================
 def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -328,4 +338,6 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
                     axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
                     
         return t_list, u_list
+#==========================================================
+#==========================================================
     

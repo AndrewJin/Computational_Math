@@ -26,7 +26,7 @@ def main():
     #Using adaptive solver
     err_target = 1e-6
     t_list, u_list = ivp.adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars)
-    print(t_list)
+    dt_list = [t_list[i + 1] - t_list[i] for i in range(0, len(t_list) - 1)]
     
     
     
