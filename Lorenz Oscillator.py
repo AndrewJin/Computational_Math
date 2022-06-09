@@ -6,7 +6,7 @@ import numpy as np
 import Initial_Value_Problems as ivp
     
 def main():
-    #ODE
+    #Describe ODE with parameters
     s = 10
     p = 28
     b = 8/3

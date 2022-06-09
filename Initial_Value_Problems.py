@@ -6,7 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-#TO DO: REVISE ADAPTIVE IVP SOLVER
+
+
 
 def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     """
@@ -18,7 +19,7 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     u_0: initial value
     dt: time step
     t_final: final time
-    method: either "euler" or "rk2" or "rk4"
+    method: either "euler", "midpoint", "trapezoid", "classic_rk4", "equal_rk4"
     plot_vars: list of variables to plot against time 
                (for scalar equation, leave blank)
     phase_vars: variables to plot in phase diagram (list of ordered pairs)
@@ -240,7 +241,7 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     u_0_list: list of initial values
     dt: time step
     t_final: final time
-    method: either "euler" or "rk2" or "rk4"
+    method: either "euler", "midpoint", "trapezoid", "classic_rk4", "equal_rk4", "adaptive"
     plot_vars: variables to plot against time
     phase_vars: variables to plot in phase diagram (list of ordered pairs)
     
@@ -252,39 +253,79 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     u_list: array of ordered tuples representing solution for each initial condition
     """
     
-    n = int(t_final / dt)
-    fig = plt.figure( figsize = (24,12) )
-    t_list = np.linspace(0, t_final, n + 1)
+    if method == "euler" or method == "midpoint" or method == "trapezoid" or method == "classic_rk4" or method == "equal_rk4":
+        n = int(t_final / dt)
+        fig = plt.figure( figsize = (24,12) )
+        t_list = np.linspace(0, t_final, n + 1)
+        
+        if isinstance(u_0_list[0], float):
+            u_list = np.empty( (len(u_0_list), n+1) )
+            axes = fig.subplots(1, 1)
+            
+            for i, u_0 in enumerate(u_0_list):
+                u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
     
-    if isinstance(u_0_list[0], float):
-        u_list = np.empty( (len(u_0_list), n+1) )
-        axes = fig.subplots(1, 1)
+                axes.plot(t_list, u_list[i,:])
+                axes.set_title("Time series for x")
+                axes.set_xlabel("t")
+                axes.set_ylabel("x")
         
-        for i, u_0 in enumerate(u_0_list):
-            u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
-
-            axes.plot(t_list, u_list[i,:])
-            axes.set_title("Time series for x")
-            axes.set_xlabel("t")
-            axes.set_ylabel("x")
+        elif isinstance(u_0_list[0], np.ndarray):
+            u_list = np.empty( (len(u_0_list), n + 1, len(u_0_list[0])) )
+            axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+            
+            for i, u_0 in enumerate(u_0_list):
+                u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
+                
+                for j, var in enumerate(plot_vars):
+                    axes[0, j].plot(t_list, u_list[i,:,var])
+                    axes[0, j].set_title("Time series for x" + str(var))
+                    axes[0, j].set_xlabel("t")
+                    axes[0, j].set_ylabel("x" + str(var))
+            
+                for j, var in enumerate(phase_vars):
+                    axes[1, j].plot(u_list[i,:,var[0]], u_list[i,:,var[1]])
+                    axes[1, j].set_xlabel("x" + str(var[0]))
+                    axes[1, j].set_ylabel("y" + str(var[1]))
+                    axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+                
+        return u_list
+                
+    elif method == "adaptive":
+        t_list = [] #2-D array, first index for initial condition, second index for time
+        u_list = [] #2-D array (scalar ODE), first index for initial condition, second index for solution
+                    #3-D array (system ODE), first index for initial condition, second index for solution vector, third index for solution component
+        fig = plt.figure( figsize = (24,12) )
         
-    elif isinstance(u_0_list[0], np.ndarray):
-        u_list = np.empty( (len(u_0_list), n + 1, len(u_0_list[0])) )
-        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+        if isinstance(u_0_list[0], float):
+            axes = fig.subplots(1, 1)
+            
+            for u_0 in u_0_list:
+                cur_t_list, cur_u_list = adaptive_ivp(f, u_0, t_final, 1e-6, [], [])
+                u_list.append(cur_u_list)
+    
+                axes.plot(cur_t_list, cur_u_list)
+                axes.set_title("Time series for x")
+                axes.set_xlabel("t")
+                axes.set_ylabel("x")
         
-        for i, u_0 in enumerate(u_0_list):
-            u_list[i] = solve_ivp(f, u_0, dt, t_final, method, [], [])
+        elif isinstance(u_0_list[0], np.ndarray):
+            axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
             
-            for j, var in enumerate(plot_vars):
-                axes[0, j].plot(t_list, u_list[i,:,var])
-                axes[0, j].set_title("Time series for x" + str(var))
-                axes[0, j].set_xlabel("t")
-                axes[0, j].set_ylabel("x" + str(var))
+            for u_0 in u_0_list:
+                cur_t_list, cur_u_list = adaptive_ivp(f, u_0, t_final, 1e-6, [], [])
+                
+                for j, var in enumerate(plot_vars):
+                    axes[0, j].plot(cur_t_list, [u[var] for u in cur_u_list])
+                    axes[0, j].set_title("Time series for x" + str(var))
+                    axes[0, j].set_xlabel("t")
+                    axes[0, j].set_ylabel("x" + str(var))
             
-            for j, var in enumerate(phase_vars):
-                axes[1, j].plot(u_list[i,:,var[0]], u_list[i,:,var[1]])
-                axes[1, j].set_xlabel("x" + str(var[0]))
-                axes[1, j].set_ylabel("y" + str(var[1]))
-                axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
-            
-    return u_list
+                for j, var in enumerate(phase_vars):
+                    axes[1, j].plot([u[var[0]] for u in cur_u_list], [u[var[1]] for u in cur_u_list])
+                    axes[1, j].set_xlabel("x" + str(var[0]))
+                    axes[1, j].set_ylabel("y" + str(var[1]))
+                    axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+                    
+        return t_list, u_list
+    
