@@ -49,7 +49,7 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     t_list = np.linspace(0, t_final, n + 1)
     u_list[0] = u_0
     
-    #==================================
+    #----------------------------------
     #Integration Algorithms
     if method == "euler":
         for i in range(n):
@@ -97,10 +97,10 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
             
     else:
         raise Exception("Enter \"euler\", \"midpoint\", \"trapezoid\", \"ralston\", \"classic_rk4\" or \"equal_rk4\"")
-    #==================================
+    #----------------------------------
        
     
-    #==================================
+    #----------------------------------
     #Graphing
     fig = plt.figure( figsize = (24,12) )
     
@@ -125,7 +125,7 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
             axes[1, i].set_xlabel("x" + str(var[0]))
             axes[1, i].set_ylabel("y" + str(var[1]))
             axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
-    #==================================
+    #----------------------------------
     
     return u_list
 #==========================================================
