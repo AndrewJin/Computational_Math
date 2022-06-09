@@ -14,7 +14,7 @@ def main():
     
     #Parameters for numerical integration and graphing
     dt = 0.001
-    t_final = 50
+    t_final = 200
     method = "equal_rk4"
     plot_vars = [0, 1]
     phase_vars = [(0, 1)]

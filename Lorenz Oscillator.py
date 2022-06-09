@@ -16,14 +16,18 @@ def main():
     u_0_list = [np.array([1., 1., 1.]), np.array([1.0002, 1.0002, 1.0002])]
     
     #Parameters for numerical integration and graphing
-    dt = 0.0001
+    dt = 0.001
     t_final = 30
     method = "equal_rk4"
     plot_vars = [0, 1, 2]
     phase_vars = [(0,1), (0,2), (1,2)]
     
     #Run the algorithm
-    ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)    
+    ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)
+    
+    #With adaptive time step
+    err_target = 1e-6
+    ivp.compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars)
     
     
 if __name__ == "__main__":
