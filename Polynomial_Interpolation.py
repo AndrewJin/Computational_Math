@@ -4,6 +4,7 @@ Computational Math Module 2: Polynomial interpolation
 
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sp
 
 def interpolate(x_list,y_list):
     """
@@ -17,15 +18,17 @@ def interpolate(x_list,y_list):
     p: function of x representing the interpolating polynomial
     """
     
+    #Numerical solution
     def l(k,x):
         """
         Evaluates the k-th Lagrange polynomial at x
         """
         output = 1
+        
         for i in range( len(x_list) ):
-            if i == k:
-                continue
-            output *= (x - x_list[i]) / (x_list[k] - x_list[i])
+            if i != k:
+                output *= (x - x_list[i]) / (x_list[k] - x_list[i])
+                
         return output
     
     def p(x):
@@ -33,11 +36,27 @@ def interpolate(x_list,y_list):
         Evaluate the interpolating polynomial at x, constructed using Lagrange basis
         """
         output = 0
+        
         for i in range( len(x_list) ):
             output += y_list[i] * l(i,x)
+            
         return output
     
-    return p
+
+    #Symbolic solution
+    sp_x = sp.symbols('x')
+    sp_poly = sp.sympify(0)
+    
+    for i in range( len(x_list) ): #Add all Lagrange polnomials
+        ith_poly = sp.sympify(1)
+        for j in range( len(x_list) ): #Construct Lagrange polynomial iteratively
+            if j != i:
+                ith_poly *= (sp_x - x_list[j]) / (x_list[i] - x_list[j])
+        sp_poly += y_list[i] * ith_poly
+        
+    sp_poly = sp.expand(sp_poly)
+        
+    return p, sp_poly
 
 
 def interpolate_function(f, x_min, x_max, n, method):
@@ -69,7 +88,7 @@ def interpolate_function(f, x_min, x_max, n, method):
     else:
         raise Exception("Enter \"equidistant\" or \"chebyshev\".")
     
-    p = interpolate(x_list, y_list)
+    p, sp_poly = interpolate(x_list, y_list)
     
     fig = plt.figure( figsize = (8,6) )
     ax = fig.add_subplot()
@@ -85,4 +104,4 @@ def interpolate_function(f, x_min, x_max, n, method):
     ax.plot(x_plot,y_approx, label = 'approx', color = 'red')
     ax.legend()
     
-    return p
+    return p, sp_poly
