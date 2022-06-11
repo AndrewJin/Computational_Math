@@ -31,7 +31,7 @@ def main():
     ivp.compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars)
     
     #With adaptive time step
-    ivp.compare_ivp(f, u_0_list, dt, t_final, "adaptive", plot_vars, phase_vars)
+    ivp.compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars)
     
     
     
