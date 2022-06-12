@@ -113,18 +113,19 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
             axes.set_ylabel("x")
     
     elif isinstance(u_0, np.ndarray):
-        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
-        for i, var in enumerate(plot_vars):
-            axes[0, i].plot(t_list, u_list[:,var])
-            axes[0, i].set_title("Time series for x" + str(var))
-            axes[0, i].set_xlabel("t")
-            axes[0, i].set_ylabel("x" + str(var))
-            
-        for i, var in enumerate(phase_vars):
-            axes[1, i].plot(u_list[:,var[0]], u_list[:,var[1]])
-            axes[1, i].set_xlabel("x" + str(var[0]))
-            axes[1, i].set_ylabel("y" + str(var[1]))
-            axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+        if plot_vars or phase_vars:
+            axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+            for i, var in enumerate(plot_vars):
+                axes[0, i].plot(t_list, u_list[:,var])
+                axes[0, i].set_title("Time series for x" + str(var))
+                axes[0, i].set_xlabel("t")
+                axes[0, i].set_ylabel("x" + str(var))
+                
+            for i, var in enumerate(phase_vars):
+                axes[1, i].plot(u_list[:,var[0]], u_list[:,var[1]])
+                axes[1, i].set_xlabel("x" + str(var[0]))
+                axes[1, i].set_ylabel("y" + str(var[1]))
+                axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     #----------------------------------
     
     return u_list
