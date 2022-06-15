@@ -29,8 +29,8 @@ def main():
     
     #With different initial values, using adaptive time step
     u_0_list = [np.array([1., 0.]), np.array([1.5, 0.]), np.array([2., 0.])]
-    ivp.compare_ivp(f, u_0_list, dt, t_final, "adaptive", plot_vars, phase_vars)
-    
+    t_list, u_list = ivp.compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars)
+    dt_list = [t_list[i + 1] - t_list[i] for i in range(0, len(t_list) - 1)]
 
 if __name__ == "__main__":
     main()
