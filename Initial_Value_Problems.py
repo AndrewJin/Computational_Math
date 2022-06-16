@@ -5,7 +5,6 @@ Functions: solve_ivp, adaptive_ivp, compare_ivp
 
 import numpy as np
 import matplotlib.pyplot as plt
-from collections import deque
 
 
 
@@ -165,8 +164,8 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
         u = u_0.copy()
         
     t = 0
-    u_list = deque()
-    t_list = deque()
+    u_list = []
+    t_list = []
     u_list.append(u_0)
     t_list.append(0)
     dt_trial = 0.01
@@ -220,18 +219,19 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
             axes.set_ylabel("x")
             
     elif isinstance(u_0, np.ndarray):
-        axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
-        for i, var in enumerate(plot_vars):
-            axes[0, i].plot(t_list, [u[var] for u in u_list])
-            axes[0, i].set_title("Time series for x" + str(var))
-            axes[0, i].set_xlabel("t")
-            axes[0, i].set_ylabel("x" + str(var))
-            
-        for i, var in enumerate(phase_vars):
-            axes[1, i].plot([u[var[0]] for u in u_list], [u[var[1]] for u in u_list])
-            axes[1, i].set_xlabel("x" + str(var[0]))
-            axes[1, i].set_ylabel("y" + str(var[1]))
-            axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+        if plot_vars or phase_vars:
+            axes = fig.subplots(2, max(len(plot_vars), len(phase_vars)))
+            for i, var in enumerate(plot_vars):
+                axes[0, i].plot(t_list, [u[var] for u in u_list])
+                axes[0, i].set_title("Time series for x" + str(var))
+                axes[0, i].set_xlabel("t")
+                axes[0, i].set_ylabel("x" + str(var))
+                
+            for i, var in enumerate(phase_vars):
+                axes[1, i].plot([u[var[0]] for u in u_list], [u[var[1]] for u in u_list])
+                axes[1, i].set_xlabel("x" + str(var[0]))
+                axes[1, i].set_ylabel("y" + str(var[1]))
+                axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     
     return t_list, u_list
 #==========================================================
