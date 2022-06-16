@@ -1,5 +1,5 @@
 """
-Solves, then animates solution to the harmonic oscillator.
+Solves, then animates solution to the real pendulum.
 """
 
 import Initial_Value_Problems as ivp
@@ -192,5 +192,5 @@ class HarmonicOscillatorPhase(mn.Scene):
         
         #Make the animation
         self.wait(2)
-        self.play(e.animate.set_value(t_final), run_time = 8, rate_func = mn.linear) #e.animate parameter ie end time
+        self.play(e.animate.set_value(t_final), run_time = 8)
         self.wait(2)
