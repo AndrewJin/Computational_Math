@@ -26,9 +26,9 @@ class LorenzOscillatorTime(mn.Scene):
         
         #Run the algorithm, but don't plot, just return solution
         u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
-        u0_list = [u[0] for u in u_list]
-        u1_list = [u[1] for u in u_list]
-        u2_list = [u[2] for u in u_list]
+        x_list = [u[0] for u in u_list]
+        y_list = [u[1] for u in u_list]
+        z_list = [u[2] for u in u_list]
         #------------------------------
         
         
@@ -36,7 +36,7 @@ class LorenzOscillatorTime(mn.Scene):
         #------------------------------
         #Construct the coordinate axes
         axes0 = mn.Axes(x_range = [0, t_final, t_final / 10],
-                        y_range = [min(u0_list), max(u0_list), (max(u0_list) - min(u0_list)) / 10],
+                        y_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
                         x_length = 4,
                         y_length = 4,                     
                         tips = False)
@@ -44,14 +44,14 @@ class LorenzOscillatorTime(mn.Scene):
 
         
         axes1 = mn.Axes(x_range = [0, t_final, t_final / 10],
-                        y_range = [min(u1_list), max(u1_list), (max(u1_list) - min(u1_list)) / 10],
+                        y_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
                         x_length = 4,
                         y_length = 4,
                         tips = False)
                         
                         
         axes2 = mn.Axes(x_range = [0, t_final, t_final / 10],
-                        y_range = [min(u2_list), max(u2_list), (max(u2_list) - min(u2_list)) / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
                         x_length = 4,
                         y_length = 4,
                     tips = False)              
@@ -80,11 +80,11 @@ class LorenzOscillatorTime(mn.Scene):
             Solution to x interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u0_list) - 1:
+            if i <= len(x_list) - 1:
                 if i == int(i): #i is integer
-                    return u0_list[int(i)]
+                    return x_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])   
+                    return x_list[math.ceil(i)] * math.modf(i)[0] + x_list[math.floor(i)] * (1 - math.modf(i)[0])   
         
         
         def y(t):
@@ -92,11 +92,11 @@ class LorenzOscillatorTime(mn.Scene):
             Solution to y interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u1_list) - 1:
+            if i <= len(y_list) - 1:
                 if i == int(i): #i is integer
-                    return u1_list[int(i)]
+                    return y_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    return y_list[math.ceil(i)] * math.modf(i)[0] + y_list[math.floor(i)] * (1 - math.modf(i)[0])
 
 
         def z(t):
@@ -104,11 +104,11 @@ class LorenzOscillatorTime(mn.Scene):
             Solution to z interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u2_list) - 1:
+            if i <= len(z_list) - 1:
                 if i == int(i): #i is integer
-                    return u2_list[int(i)]
+                    return z_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u2_list[math.ceil(i)] * math.modf(i)[0] + u2_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    return z_list[math.ceil(i)] * math.modf(i)[0] + z_list[math.floor(i)] * (1 - math.modf(i)[0])
         
         
         functions = mn.VGroup()  #Stores functions to plot
@@ -167,32 +167,32 @@ class LorenzOscillatorPhase(mn.Scene):
 
         #Run the algorithm, but don't plot, just return solution
         u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
-        u0_list = [u[0] for u in u_list]
-        u1_list = [u[1] for u in u_list]
-        u2_list = [u[2] for u in u_list]
+        x_list = [u[0] for u in u_list]
+        y_list = [u[1] for u in u_list]
+        z_list = [u[2] for u in u_list]
         #------------------------------
         
         
         #Setup animation
         #------------------------------
         #x-y projection
-        axes0 = mn.Axes(x_range = [min(u0_list), max(u0_list), (max(u0_list) - min(u0_list)) / 10],
-                        y_range = [min(u1_list), max(u1_list), (max(u1_list) - min(u1_list)) / 10],
+        axes0 = mn.Axes(x_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
+                        y_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
                         x_length = 4,
                         y_length = 4,                     
                         tips = False)
         axes0.shift(mn.LEFT * 4.5)
                         
         #x-z projection               
-        axes1 = mn.Axes(x_range = [min(u0_list), max(u0_list), (max(u0_list) - min(u0_list)) / 10],
-                        y_range = [min(u2_list), max(u2_list), (max(u2_list) - min(u2_list)) / 10],
+        axes1 = mn.Axes(x_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
                         x_length = 4,
                         y_length = 4,                     
                         tips = False)  
                         
         #y-z projection              
-        axes2 = mn.Axes(x_range = [min(u1_list), max(u1_list), (max(u1_list) - min(u1_list)) / 10],
-                        y_range = [min(u2_list), max(u2_list), (max(u2_list) - min(u2_list)) / 10],
+        axes2 = mn.Axes(x_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
                         x_length = 4,
                         y_length = 4,                     
                         tips = False)   
@@ -221,11 +221,11 @@ class LorenzOscillatorPhase(mn.Scene):
             Solution to x interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u0_list) - 1:
+            if i <= len(x_list) - 1:
                 if i == int(i): #i is integer
-                    return u0_list[int(i)]
+                    return x_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    return x_list[math.ceil(i)] * math.modf(i)[0] + x_list[math.floor(i)] * (1 - math.modf(i)[0])
         
         
         def y(t):
@@ -233,11 +233,11 @@ class LorenzOscillatorPhase(mn.Scene):
             Solution to y interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u1_list) - 1:
+            if i <= len(y_list) - 1:
                 if i == int(i): #i is integer
-                    return u1_list[int(i)]
+                    return y_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    return y_list[math.ceil(i)] * math.modf(i)[0] + y_list[math.floor(i)] * (1 - math.modf(i)[0])
 
 
         def z(t):
@@ -245,11 +245,11 @@ class LorenzOscillatorPhase(mn.Scene):
             Solution to z interpolated from list of points.
             """
             i = t / dt
-            if i <= len(u2_list) - 1:
+            if i <= len(z_list) - 1:
                 if i == int(i): #i is integer
-                    return u2_list[int(i)]
+                    return z_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
-                    return u2_list[math.ceil(i)] * math.modf(i)[0] + u2_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    return z_list[math.ceil(i)] * math.modf(i)[0] + z_list[math.floor(i)] * (1 - math.modf(i)[0])
         
         
         def xy(t):
