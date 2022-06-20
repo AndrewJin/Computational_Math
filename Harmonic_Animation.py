@@ -15,10 +15,12 @@ class HarmonicOscillatorTime(mn.Scene):
         f = lambda t,u: np.array([ u[1] , -10 * np.sin(u[0]) ])
         u_0 = np.array([7 * np.pi / 8, 0]) 
         
+        
         #Parameters for numerical integration and graphing
         dt = 0.01
         t_final = 10
         method = "equal_rk4"
+        
         
         #Run the algorithm, but don't plot, just return solution
         u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
@@ -27,7 +29,7 @@ class HarmonicOscillatorTime(mn.Scene):
         #------------------------------
         
         
-        #Setup animation and animate solution
+        #Setup animation
         #------------------------------
         #Construct the coordinate axes
         axes0 = mn.Axes(x_range = [0, t_final, t_final / 10],
@@ -45,8 +47,8 @@ class HarmonicOscillatorTime(mn.Scene):
                         tips = False)
         axes1.shift(mn.RIGHT * 3)
         
-        #Add titles and labels
         
+        #Add labels
         labels = mn.VGroup()
         labels += axes0.get_x_axis_label(mn.Tex(r"$t$", font_size = 24), edge = mn.RIGHT, direction = mn.RIGHT)
         labels += axes0.get_y_axis_label(mn.Tex(r"$\theta$", font_size = 24), edge = mn.LEFT, direction = mn.LEFT)
@@ -55,8 +57,6 @@ class HarmonicOscillatorTime(mn.Scene):
         
         
         #Add functions to plot
-        functions = mn.VGroup()  #Stores functions to plot
-        
         def u0(t):
             """
             Solution to angular position interpolated from list of points.
@@ -67,6 +67,7 @@ class HarmonicOscillatorTime(mn.Scene):
                     return u0_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
                     return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])   
+        
         
         def u1(t):
             """
@@ -79,14 +80,19 @@ class HarmonicOscillatorTime(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])   
         
+        
+        functions = mn.VGroup()  #Stores functions to plot
         functions += axes0.plot(u0, x_range = [0, t_final], color = mn.BLUE)
         functions += axes1.plot(u1, x_range = [0, t_final], color = mn.GREEN)
         
         
-        
         #Construct objects unrelated to animation (initial setup)
         self.add(axes0, axes1, labels, functions)
+        #------------------------------
         
+        
+        #Make the animation
+        #------------------------------
         #Make objects for the animation
         e = mn.ValueTracker(0.01) #parameter is start time
         
@@ -96,13 +102,16 @@ class HarmonicOscillatorTime(mn.Scene):
         u1_line_anim = mn.always_redraw(lambda : axes1.plot(u1, x_range = [0, e.get_value()], color = mn.YELLOW))
         u1_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes1.c2p(e.get_value(), u1(e.get_value()))))
         
+        
         #Construct objects for animation
         self.add(u0_line_anim, u0_dot_anim, u1_line_anim, u1_dot_anim)
         
+        
         #Make the animation
         self.wait(2)
-        self.play(e.animate.set_value(t_final), run_time = 8, rate_func = mn.linear) #e.animate parameter ie end time
+        self.play(e.animate.set_value(t_final), run_time = 8, rate_func = mn.linear)
         self.wait(2)
+        #------------------------------
         
         
 class HarmonicOscillatorPhase(mn.Scene):
@@ -113,10 +122,12 @@ class HarmonicOscillatorPhase(mn.Scene):
         f = lambda t,u: np.array([ u[1] , -10 * np.sin(u[0]) ])
         u_0 = np.array([7 * np.pi / 8, 0]) 
         
+        
         #Parameters for numerical integration and graphing
         dt = 0.01
         t_final = 10
         method = "equal_rk4"
+        
         
         #Run the algorithm, but don't plot, just return solution
         u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
@@ -125,7 +136,7 @@ class HarmonicOscillatorPhase(mn.Scene):
         #------------------------------
         
         
-        #Setup animation and animate solution
+        #Setup animation
         #------------------------------
         #Construct the coordinate axes
         #Position on x axis, Velocity on y axis
@@ -136,16 +147,13 @@ class HarmonicOscillatorPhase(mn.Scene):
                        tips = False)
                        
         
-        #Add titles and labels
-        
+        #Add labels
         labels = mn.VGroup()
         labels += axes.get_x_axis_label(mn.Tex(r"$\theta$", font_size = 24), edge = mn.RIGHT)
         labels += axes.get_y_axis_label(mn.Tex(r"$\omega$", font_size = 24), edge = mn.UP)
         
         
         #Add functions to plot
-        functions = mn.VGroup()  #Stores functions to plot
-        
         def u0(t):
             """
             Solution to angular position interpolated from list of points.
@@ -156,6 +164,7 @@ class HarmonicOscillatorPhase(mn.Scene):
                     return u0_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
                     return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])   
+        
         
         def u1(t):
             """
@@ -168,6 +177,7 @@ class HarmonicOscillatorPhase(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])   
         
+        
         def u0_u1(t):
             """
             Parametric function of t with u0(t) on x axis and u1(t) on y axis
@@ -175,22 +185,30 @@ class HarmonicOscillatorPhase(mn.Scene):
             return [u0(t), u1(t), 0]
         
         
-        f1 = axes.plot_parametric_curve(lambda t: u0_u1(t), t_range = [0, t_final])
+        functions = mn.VGroup()  #Stores functions to plot
+        functions += axes.plot_parametric_curve(lambda t: u0_u1(t), t_range = [0, t_final])
         
-        functions += f1
-        
+
         #Construct objects unrelated to animation (initial setup)
         self.add(axes, labels, functions)
+        #------------------------------
         
+        
+        #Make the animation
+        #------------------------------
         #Make objects for the animation
-        e = mn.ValueTracker(0.01) #parameter is start time
+        e = mn.ValueTracker(0.01)
         
-        dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes.c2p(u0(e.get_value()), u1(e.get_value()))))
+        dots = mn.VGroup()
+        dots += mn.always_redraw(lambda : mn.Dot(color = mn.RED).move_to(axes.c2p(u0(e.get_value()), u1(e.get_value()))))
+        
         
         #Construct objects for animation
-        self.add(dot_anim)
+        self.add(dots)
+        
         
         #Make the animation
         self.wait(2)
-        self.play(e.animate.set_value(t_final), run_time = 8)
+        self.play(e.animate.set_value(t_final), run_time = 8, rate_func = mn.linear)
         self.wait(2)
+        #------------------------------

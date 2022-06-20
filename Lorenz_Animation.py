@@ -125,7 +125,7 @@ class LorenzOscillatorTime(mn.Scene):
         #Make the animation
         #------------------------------
         #Make objects for the animation
-        e = mn.ValueTracker(0.01) #parameter is start time
+        e = mn.ValueTracker(0.01)
         
         x_line_anim = mn.always_redraw(lambda : axes0.plot(x, x_range = [0, e.get_value()], color = mn.WHITE))
         x_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes0.c2p(e.get_value(), x(e.get_value()))))
@@ -143,7 +143,7 @@ class LorenzOscillatorTime(mn.Scene):
         
         #Make the animation
         self.wait(2)
-        self.play(e.animate.set_value(t_final), run_time = 30)
+        self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
         self.wait(2)
         #------------------------------
         
@@ -320,6 +320,6 @@ class LorenzOscillatorPhase(mn.Scene):
         
         #Make the animation
         self.wait(2)
-        self.play(e.animate.set_value(t_final), run_time = 30)
+        self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
         self.wait(2)
         #------------------------------
