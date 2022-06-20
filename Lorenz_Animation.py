@@ -11,12 +11,12 @@ class LorenzOscillatorTime(mn.Scene):
     def construct(self):
         #Describe and solve IVP
         #------------------------------
-        #u[0] is angular position, u[1] is angular velocity
         s = 10
         p = 28
         b = 8/3
         f = lambda t,u: np.array([s * (u[1] - u[0]), u[0] * (p - u[2]) - u[1], u[0] * u[1] - b * u[2]])
         u_0 = np.array([1., 1., 1.])
+        
         
         #Parameters for numerical integration
         dt = 0.001
@@ -29,11 +29,10 @@ class LorenzOscillatorTime(mn.Scene):
         u0_list = [u[0] for u in u_list]
         u1_list = [u[1] for u in u_list]
         u2_list = [u[2] for u in u_list]
-
         #------------------------------
         
         
-        #Setup animation and animate solution
+        #Setup animation
         #------------------------------
         #Construct the coordinate axes
         axes0 = mn.Axes(x_range = [0, t_final, t_final / 10],
@@ -59,9 +58,13 @@ class LorenzOscillatorTime(mn.Scene):
         axes2.shift(mn.RIGHT * 4.5)
         
         
+        axes = mn.VGroup()
+        axes += axes0
+        axes += axes1
+        axes += axes2
         
-        #Add titles and labels
         
+        #Add labels
         labels = mn.VGroup()
         labels += axes0.get_x_axis_label(mn.Tex(r"$t$", font_size = 24), edge = mn.RIGHT, direction = mn.RIGHT)
         labels += axes0.get_y_axis_label(mn.Tex(r"$x$", font_size = 24), edge = mn.LEFT, direction = mn.LEFT)
@@ -72,11 +75,7 @@ class LorenzOscillatorTime(mn.Scene):
         
         
         #Add functions to plot
-        functions = mn.VGroup()  #Stores functions to plot
-        
-        
-        #CONSTANT dt SOLUTION
-        def u0(t):
+        def x(t):
             """
             Solution to x interpolated from list of points.
             """
@@ -87,7 +86,8 @@ class LorenzOscillatorTime(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])   
         
-        def u1(t):
+        
+        def y(t):
             """
             Solution to y interpolated from list of points.
             """
@@ -98,7 +98,8 @@ class LorenzOscillatorTime(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])
 
-        def u2(t):
+
+        def z(t):
             """
             Solution to z interpolated from list of points.
             """
@@ -110,50 +111,59 @@ class LorenzOscillatorTime(mn.Scene):
                     return u2_list[math.ceil(i)] * math.modf(i)[0] + u2_list[math.floor(i)] * (1 - math.modf(i)[0])
         
         
-        functions += axes0.plot(u0, x_range = [0, t_final], color = mn.BLUE)
-        functions += axes1.plot(u1, x_range = [0, t_final], color = mn.GREEN)
-        functions += axes2.plot(u2, x_range = [0, t_final], color = mn.RED)
+        functions = mn.VGroup()  #Stores functions to plot
+        functions += axes0.plot(x, x_range = [0, t_final], color = mn.BLUE)
+        functions += axes1.plot(y, x_range = [0, t_final], color = mn.GREEN)
+        functions += axes2.plot(z, x_range = [0, t_final], color = mn.RED)
         
         
         #Construct objects unrelated to animation (initial setup)
-        self.add(axes0, axes1, axes2, labels, functions)
+        self.add(axes, labels, functions)
+        #------------------------------
         
+        
+        #Make the animation
+        #------------------------------
         #Make objects for the animation
         e = mn.ValueTracker(0.01) #parameter is start time
         
-        u0_line_anim = mn.always_redraw(lambda : axes0.plot(u0, x_range = [0, e.get_value()], color = mn.WHITE))
-        u0_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes0.c2p(e.get_value(), u0(e.get_value()))))
+        x_line_anim = mn.always_redraw(lambda : axes0.plot(x, x_range = [0, e.get_value()], color = mn.WHITE))
+        x_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes0.c2p(e.get_value(), x(e.get_value()))))
         
-        u1_line_anim = mn.always_redraw(lambda : axes1.plot(u1, x_range = [0, e.get_value()], color = mn.WHITE))
-        u1_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes1.c2p(e.get_value(), u1(e.get_value()))))
+        y_line_anim = mn.always_redraw(lambda : axes1.plot(y, x_range = [0, e.get_value()], color = mn.WHITE))
+        y_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes1.c2p(e.get_value(), y(e.get_value()))))
         
-        u2_line_anim = mn.always_redraw(lambda : axes2.plot(u2, x_range = [0, e.get_value()], color = mn.WHITE))
-        u2_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes2.c2p(e.get_value(), u2(e.get_value()))))
+        z_line_anim = mn.always_redraw(lambda : axes2.plot(z, x_range = [0, e.get_value()], color = mn.WHITE))
+        z_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(axes2.c2p(e.get_value(), z(e.get_value()))))
+        
         
         #Construct objects for animation
-        self.add(u0_line_anim, u0_dot_anim, u1_line_anim, u1_dot_anim, u2_line_anim, u2_dot_anim)
+        self.add(x_line_anim, x_dot_anim, y_line_anim, y_dot_anim, z_line_anim, z_dot_anim)
+        
         
         #Make the animation
         self.wait(2)
         self.play(e.animate.set_value(t_final), run_time = 30)
         self.wait(2)
+        #------------------------------
         
         
 class LorenzOscillatorPhase(mn.Scene):
     def construct(self):
         #Describe and solve IVP
         #------------------------------
-        #u[0] is angular position, u[1] is angular velocity
         s = 10
         p = 28
         b = 8/3
         f = lambda t,u: np.array([s * (u[1] - u[0]), u[0] * (p - u[2]) - u[1], u[0] * u[1] - b * u[2]])
         u_0 = np.array([1., 1., 1.])
         
+        
         #Parameters for numerical integration
         dt = 0.001
         t_final = 30
         method = "equal_rk4"
+
 
         #Run the algorithm, but don't plot, just return solution
         u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
@@ -163,7 +173,7 @@ class LorenzOscillatorPhase(mn.Scene):
         #------------------------------
         
         
-        #Setup animation and animate solution
+        #Setup animation
         #------------------------------
         #x-y projection
         axes0 = mn.Axes(x_range = [min(u0_list), max(u0_list), (max(u0_list) - min(u0_list)) / 10],
@@ -188,8 +198,14 @@ class LorenzOscillatorPhase(mn.Scene):
                         tips = False)   
         axes2.shift(mn.RIGHT * 4.5)
         
-        #Add titles and labels
         
+        axes = mn.VGroup()
+        axes += axes0
+        axes += axes1
+        axes += axes2
+       
+       
+        #Add labels 
         labels = mn.VGroup()
         labels += axes0.get_x_axis_label(mn.Tex(r"$x$", font_size = 24), edge = mn.RIGHT)
         labels += axes0.get_y_axis_label(mn.Tex(r"$y$", font_size = 24), edge = mn.UP)
@@ -200,8 +216,6 @@ class LorenzOscillatorPhase(mn.Scene):
         
         
         #Add functions to plot
-        functions = mn.VGroup()  #Stores functions to plot
-        
         def x(t):
             """
             Solution to x interpolated from list of points.
@@ -212,6 +226,7 @@ class LorenzOscillatorPhase(mn.Scene):
                     return u0_list[int(i)]
                 else: #i isn't integer, interpolate between nearest points
                     return u0_list[math.ceil(i)] * math.modf(i)[0] + u0_list[math.floor(i)] * (1 - math.modf(i)[0])
+        
         
         def y(t):
             """
@@ -224,6 +239,7 @@ class LorenzOscillatorPhase(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u1_list[math.ceil(i)] * math.modf(i)[0] + u1_list[math.floor(i)] * (1 - math.modf(i)[0])
 
+
         def z(t):
             """
             Solution to z interpolated from list of points.
@@ -235,17 +251,20 @@ class LorenzOscillatorPhase(mn.Scene):
                 else: #i isn't integer, interpolate between nearest points
                     return u2_list[math.ceil(i)] * math.modf(i)[0] + u2_list[math.floor(i)] * (1 - math.modf(i)[0])
         
+        
         def xy(t):
             """
             Paramemtric function for (x,y)
             """
             return [x(t), y(t), 0]
             
+            
         def xz(t):
             """
             Parametric function for (x,z)
             """
             return [x(t), z(t), 0]
+            
             
         def yz(t):
             """
@@ -258,13 +277,20 @@ class LorenzOscillatorPhase(mn.Scene):
         f_xz = axes1.plot_parametric_curve(lambda t: xz(t), t_range = [0, t_final], color = mn.BLUE)
         f_yz = axes2.plot_parametric_curve(lambda t: yz(t), t_range = [0, t_final], color = mn.BLUE)
         
+        
+        functions = mn.VGroup()  #Stores functions to plot
         functions += f_xy
         functions += f_xz
         functions += f_yz
         
-        #Construct objects unrelated to animation (initial setup)
-        self.add(axes0, axes1, axes2, labels, functions)
         
+        #Construct objects unrelated to animation (initial setup)
+        self.add(axes, labels, functions)
+        #------------------------------
+        
+        
+        #Make the animation
+        #------------------------------
         #Make objects for the animation
         e = mn.ValueTracker(0.01) #parameter is start time
         
@@ -287,10 +313,13 @@ class LorenzOscillatorPhase(mn.Scene):
         dots += xz_dot_anim
         dots += yz_dot_anim
         
+        
         #Construct objects for animation
         self.add(lines, dots)
+        
         
         #Make the animation
         self.wait(2)
         self.play(e.animate.set_value(t_final), run_time = 30)
         self.wait(2)
+        #------------------------------
