@@ -324,6 +324,233 @@ class LorenzOscillatorPhase(mn.Scene):
         self.wait(2)
         #------------------------------
         
+class LorenzOscillatorAnim(mn.Scene):
+    def construct(self):
+        #Describe and solve IVP
+        #------------------------------
+        s = 10
+        p = 28
+        b = 8/3
+        f = lambda t,u: np.array([s * (u[1] - u[0]), u[0] * (p - u[2]) - u[1], u[0] * u[1] - b * u[2]])
+        u_0 = np.array([1., 1., 1.])
+        
+        
+        #Parameters for numerical integration
+        dt = 0.001
+        t_final = 30
+        method = "equal_rk4"
+
+
+        #Run the algorithm, but don't plot, just return solution
+        u_list = ivp.solve_ivp(f, u_0, dt, t_final, method, [], [])
+        x_list = [u[0] for u in u_list]
+        y_list = [u[1] for u in u_list]
+        z_list = [u[2] for u in u_list]
+        #------------------------------
+        
+        
+        #Setup animation
+        #------------------------------
+        #Time axes
+        x_axes = mn.Axes(x_range = [0, t_final, t_final / 10],
+                        y_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,                     
+                        tips = False)
+        x_axes.shift(mn.LEFT * 4.5)
+        x_axes.shift(mn.UP * 2)
+
+        
+        y_axes = mn.Axes(x_range = [0, t_final, t_final / 10],
+                        y_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,
+                        tips = False)
+        y_axes.shift(mn.UP * 2)
+                        
+                        
+                        
+        z_axes = mn.Axes(x_range = [0, t_final, t_final / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,
+                    tips = False)              
+        z_axes.shift(mn.RIGHT * 4.5)
+        z_axes.shift(mn.UP * 2)
+        
+        #Phase Axes
+        xy_axes = mn.Axes(x_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
+                        y_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,                     
+                        tips = False)
+        xy_axes.shift(mn.LEFT * 4.5)
+        xy_axes.shift(mn.DOWN * 2)
+                                     
+        xz_axes = mn.Axes(x_range = [min(x_list), max(x_list), (max(x_list) - min(x_list)) / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,                     
+                        tips = False) 
+        xz_axes.shift(mn.DOWN * 2)
+                                    
+        yz_axes = mn.Axes(x_range = [min(y_list), max(y_list), (max(y_list) - min(y_list)) / 10],
+                        y_range = [min(z_list), max(z_list), (max(z_list) - min(z_list)) / 10],
+                        x_length = 3.5,
+                        y_length = 3.5,                     
+                        tips = False)   
+        yz_axes.shift(mn.RIGHT * 4.5)
+        yz_axes.shift(mn.DOWN * 2)
+        
+        
+        axes = mn.VGroup()
+        axes += x_axes
+        axes += y_axes
+        axes += z_axes
+        axes += xy_axes
+        axes += xz_axes
+        axes += yz_axes
+       
+       
+        #Add labels 
+        labels = mn.VGroup()
+        
+        labels += x_axes.get_x_axis_label(mn.Tex(r"$t$", font_size = 24), edge = mn.RIGHT, direction = mn.RIGHT)
+        labels += x_axes.get_y_axis_label(mn.Tex(r"$x$", font_size = 24), edge = mn.LEFT, direction = mn.LEFT)
+        labels += y_axes.get_x_axis_label(mn.Tex(r"$t$", font_size = 24), edge = mn.RIGHT, direction = mn.RIGHT)
+        labels += y_axes.get_y_axis_label(mn.Tex(r"$y$", font_size = 24), edge = mn.LEFT, direction = mn.LEFT)
+        labels += z_axes.get_x_axis_label(mn.Tex(r"$t$", font_size = 24), edge = mn.RIGHT, direction = mn.RIGHT)
+        labels += z_axes.get_y_axis_label(mn.Tex(r"$z$", font_size = 24), edge = mn.LEFT, direction = mn.LEFT)
+        
+        labels += xy_axes.get_x_axis_label(mn.Tex(r"$x$", font_size = 24), edge = mn.RIGHT)
+        labels += xy_axes.get_y_axis_label(mn.Tex(r"$y$", font_size = 24), edge = mn.UP)
+        labels += xz_axes.get_x_axis_label(mn.Tex(r"$x$", font_size = 24), edge = mn.RIGHT)
+        labels += xz_axes.get_y_axis_label(mn.Tex(r"$z$", font_size = 24), edge = mn.UP)
+        labels += yz_axes.get_x_axis_label(mn.Tex(r"$y$", font_size = 24), edge = mn.RIGHT)
+        labels += yz_axes.get_y_axis_label(mn.Tex(r"$z$", font_size = 24), edge = mn.UP)
+        
+        
+        #Add functions to plot
+        def x(t):
+            """
+            Solution to x interpolated from list of points.
+            """
+            i = t / dt
+            if i <= len(x_list) - 1:
+                if i == int(i): #i is integer
+                    return x_list[int(i)]
+                else: #i isn't integer, interpolate between nearest points
+                    return x_list[math.ceil(i)] * math.modf(i)[0] + x_list[math.floor(i)] * (1 - math.modf(i)[0])   
+        
+        
+        def y(t):
+            """
+            Solution to y interpolated from list of points.
+            """
+            i = t / dt
+            if i <= len(y_list) - 1:
+                if i == int(i): #i is integer
+                    return y_list[int(i)]
+                else: #i isn't integer, interpolate between nearest points
+                    return y_list[math.ceil(i)] * math.modf(i)[0] + y_list[math.floor(i)] * (1 - math.modf(i)[0])
+
+
+        def z(t):
+            """
+            Solution to z interpolated from list of points.
+            """
+            i = t / dt
+            if i <= len(z_list) - 1:
+                if i == int(i): #i is integer
+                    return z_list[int(i)]
+                else: #i isn't integer, interpolate between nearest points
+                    return z_list[math.ceil(i)] * math.modf(i)[0] + z_list[math.floor(i)] * (1 - math.modf(i)[0])
+                    
+                    
+        def xy(t):
+            """
+            Paramemtric function for (x,y)
+            """
+            return [x(t), y(t), 0]
+            
+            
+        def xz(t):
+            """
+            Parametric function for (x,z)
+            """
+            return [x(t), z(t), 0]
+            
+            
+        def yz(t):
+            """
+            Parametric function for (y,z)
+            """
+            return [y(t), z(t), 0]
+        
+        
+        functions = mn.VGroup()  #Stores functions to plot
+        functions += x_axes.plot(x, x_range = [0, t_final], color = mn.BLUE)
+        functions += y_axes.plot(y, x_range = [0, t_final], color = mn.GREEN)
+        functions += z_axes.plot(z, x_range = [0, t_final], color = mn.RED)
+        functions += xy_axes.plot_parametric_curve(lambda t: xy(t), t_range = [0, t_final], color = mn.TEAL)
+        functions += xz_axes.plot_parametric_curve(lambda t: xz(t), t_range = [0, t_final], color = mn.TEAL)
+        functions += yz_axes.plot_parametric_curve(lambda t: yz(t), t_range = [0, t_final], color = mn.TEAL)
+        
+        
+        #Construct objects unrelated to animation (initial setup)
+        self.add(axes, labels, functions)
+        #------------------------------
+        
+        
+        #Make the animation
+        #------------------------------
+        #Make objects for the animation
+        e = mn.ValueTracker(0.01)
+        
+        lines = mn.VGroup()
+        dots = mn.VGroup()
+        
+        x_line_anim = mn.always_redraw(lambda : x_axes.plot(x, x_range = [0, e.get_value()], color = mn.WHITE))
+        y_line_anim = mn.always_redraw(lambda : y_axes.plot(y, x_range = [0, e.get_value()], color = mn.WHITE))
+        z_line_anim = mn.always_redraw(lambda : z_axes.plot(z, x_range = [0, e.get_value()], color = mn.WHITE))
+        
+        x_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(x_axes.c2p(e.get_value(), x(e.get_value()))))
+        y_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(y_axes.c2p(e.get_value(), y(e.get_value()))))
+        z_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.WHITE).move_to(z_axes.c2p(e.get_value(), z(e.get_value()))))
+ 
+        xy_line_anim = mn.always_redraw(lambda : xy_axes.plot_parametric_curve(lambda t: xy(t), t_range = [0, e.get_value()], color = mn.WHITE))
+        xz_line_anim = mn.always_redraw(lambda : xz_axes.plot_parametric_curve(lambda t: xz(t), t_range = [0, e.get_value()], color = mn.WHITE))
+        yz_line_anim = mn.always_redraw(lambda : yz_axes.plot_parametric_curve(lambda t: yz(t), t_range = [0, e.get_value()], color = mn.WHITE))
+        
+        xy_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.RED).move_to(xy_axes.c2p(x(e.get_value()), y(e.get_value()))))
+        xz_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.RED).move_to(xz_axes.c2p(x(e.get_value()), z(e.get_value()))))
+        yz_dot_anim = mn.always_redraw(lambda : mn.Dot(color = mn.RED).move_to(yz_axes.c2p(y(e.get_value()), z(e.get_value()))))
+        
+        lines += x_line_anim
+        lines += y_line_anim
+        lines += z_line_anim
+        lines += xy_line_anim 
+        lines += xz_line_anim
+        lines += yz_line_anim
+        
+        dots += x_dot_anim
+        dots += y_dot_anim
+        dots += z_dot_anim
+        dots += xy_dot_anim
+        dots += xz_dot_anim
+        dots += yz_dot_anim
+
+        
+        #Construct objects for animation
+        self.add(lines, dots)
+        
+        
+        #Make the animation
+        self.wait(2)
+        self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
+        self.wait(2)
+        #------------------------------
+        
         
 class LorenzOscillatorAdaptiveTime(mn.Scene):
     def construct(self):
