@@ -1,6 +1,5 @@
 """
 Computational Math Module 5: Initial Value Problems
-Functions: solve_ivp, adaptive_ivp, compare_ivp
 """
 
 import numpy as np
@@ -132,14 +131,14 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
 
 def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     """
-    Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
+    Solves du/dt = f(t,u), u(0) = u_0 with adaptive time step until time t_final
+    Allows for first order systems
     
     Parameters
     f: function of t and u where f = du/dt
     u_0: initial value
-    dt: time step
     t_final: final time
-    method: either "euler" or "rk2" or "rk4"
+    err_target: target step error
     plot_vars: variables to plot against time
     phase_vars: variables to plot in phase diagram (list of ordered pairs)
     
@@ -148,6 +147,7 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     Plots the 2D phase space of chosen variable pairs
     
     Returns
+    t_list: list of time points used
     u_list: list of ordered tuples representing solution at each time
     """
     #Setup variables
@@ -243,7 +243,7 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
 def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
-    for multiple different u_0, plots solution with all initial values
+    for multiple different initial values u_0, and plots solution for all u_0
     
     Parameters
     f: function of t and u where f = du/dt
@@ -304,13 +304,13 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
 def compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with adaptive time step until time t_final
-    for multiple different u_0, plots solution with all initial values
+    for multiple different initial values, plots solution for all u_0
     
     Parameters
     f: function of t and u where f = du/dt
     u_0_list: list of initial values
     t_final: final time
-    err_target: maximum error target
+    err_target: target step error
     plot_vars: variables to plot against time
     phase_vars: variables to plot in phase diagram (list of ordered pairs)
     
@@ -319,6 +319,7 @@ def compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars):
     Plots the 2D phase space of chosen variable pairs
     
     Returns
+    t_list: array of time points used
     u_list: array of ordered tuples representing solution for each initial condition
     """
     t_list = [] #2-D array, first index selects initial condition, second index selects time value
