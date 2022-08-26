@@ -6,10 +6,6 @@ Functions: solve_ivp, adaptive_ivp, compare_ivp
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-
-#==========================================================
-#==========================================================
 def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -34,6 +30,8 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     u_list: array of ordered tuples representing solution at each time
     """
     
+    #Setup variables
+    #----------------------------------
     n = int(t_final / dt) #number of steps to take, total points is n + 1
     
     if isinstance(u_0, float):
@@ -48,8 +46,8 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
     t_list = np.linspace(0, t_final, n + 1)
     u_list[0] = u_0
     
+    #Integrate the IVP
     #----------------------------------
-    #Integration Algorithms
     if method == "euler":
         for i in range(n):
             u += f(t_list[i], u) * dt
@@ -98,9 +96,8 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
         raise Exception("Enter \"euler\", \"midpoint\", \"trapezoid\", \"ralston\", \"classic_rk4\" or \"equal_rk4\"")
     #----------------------------------
        
-    
+    #Plot the solution
     #----------------------------------
-    #Graphing
     fig = plt.figure( figsize = (24,12) )
     
     if isinstance(u_0, float): #can only plot solution x over time t
@@ -127,19 +124,15 @@ def solve_ivp(f, u_0, dt, t_final, method, plot_vars, phase_vars):
                 axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
     #----------------------------------
     
+    #Return the solution
+    #----------------------------------
     return u_list
-#==========================================================
-#==========================================================
+    #----------------------------------
 
 
-
-
-#==========================================================
-#==========================================================
 def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
-    Only allows single-variable equations
     
     Parameters
     f: function of t and u where f = du/dt
@@ -155,9 +148,10 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     Plots the 2D phase space of chosen variable pairs
     
     Returns
-    u_list: deque of ordered tuples representing solution at each time
+    u_list: list of ordered tuples representing solution at each time
     """
-    
+    #Setup variables
+    #----------------------------------
     if isinstance(u_0, float):
         u = u_0
     elif isinstance(u_0, np.ndarray):
@@ -169,7 +163,10 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
     u_list.append(u_0)
     t_list.append(0)
     dt_trial = 0.01
+    #----------------------------------
     
+    #Integrate the IVP
+    #----------------------------------
     while(t < t_final):
         #First, attempt a step using a dt_trial
         
@@ -206,7 +203,10 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
         t_list.append(t)
         
         dt_trial = dt
+    #----------------------------------
 
+    #Plot the solution
+    #----------------------------------
     fig = plt.figure( figsize = (24,12) )
     
     if isinstance(u_0, float):
@@ -232,16 +232,14 @@ def adaptive_ivp(f, u_0, t_final, err_target, plot_vars, phase_vars):
                 axes[1, i].set_xlabel("x" + str(var[0]))
                 axes[1, i].set_ylabel("y" + str(var[1]))
                 axes[1, i].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
+    #----------------------------------
     
+    #Return the solution
+    #----------------------------------
     return t_list, u_list
-#==========================================================
-#==========================================================
+    #----------------------------------
 
 
-
-       
-#==========================================================
-#==========================================================
 def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with step size dt until time t_final
@@ -300,14 +298,9 @@ def compare_ivp(f, u_0_list, dt, t_final, method, plot_vars, phase_vars):
                 axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
             
     return u_list
-#==========================================================
-#==========================================================
-                
+    #----------------------------------
 
 
-
-#==========================================================
-#==========================================================
 def compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars):
     """
     Solves du/dt = f(t,u), u(0) = u_0 with adaptive time step until time t_final
@@ -328,9 +321,9 @@ def compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars):
     Returns
     u_list: array of ordered tuples representing solution for each initial condition
     """
-    t_list = [] #2-D array, first index for initial condition, second index for time
-    u_list = [] #2-D array (scalar ODE), first index for initial condition, second index for solution
-                #3-D array (system ODE), first index for initial condition, second index for solution vector, third index for solution component
+    t_list = [] #2-D array, first index selects initial condition, second index selects time value
+    u_list = [] #2-D array (scalar ODE), first index selects initial condition, second index selects solution value at specified time
+                #3-D array (system ODE), first index selects initial condition, second index selects solution vector at specified time, third index selects solution component
     fig = plt.figure( figsize = (24,12) )
     
     if isinstance(u_0_list[0], float):
@@ -364,6 +357,5 @@ def compare_adaptive(f, u_0_list, t_final, err_target, plot_vars, phase_vars):
                 axes[1, j].set_title("Phase diagram for x" + str(var[0]) + " and x" + str(var[1]))
                 
     return t_list, u_list
-#==========================================================
-#==========================================================
+    #----------------------------------
     

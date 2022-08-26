@@ -141,7 +141,7 @@ class LorenzOscillatorTime(mn.Scene):
         self.add(x_line_anim, x_dot_anim, y_line_anim, y_dot_anim, z_line_anim, z_dot_anim)
         
         
-        #Make the animation
+        #Run the animation
         self.wait(2)
         self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
         self.wait(2)
@@ -323,8 +323,12 @@ class LorenzOscillatorPhase(mn.Scene):
         self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
         self.wait(2)
         #------------------------------
-        
+ 
+ 
 class LorenzOscillatorAnim(mn.Scene):
+    """
+    Plots the time series and phase diagrams together
+    """
     def construct(self):
         #Describe and solve IVP
         #------------------------------
@@ -921,7 +925,7 @@ class LorenzOscillatorAdaptivePhase(mn.Scene):
         self.add(lines, dots)
         
         
-        #Make the animation
+        #Run the animation
         self.wait(2)
         self.play(e.animate.set_value(t_final), run_time = 30, rate_func = mn.linear)
         self.wait(2)
