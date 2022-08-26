@@ -13,7 +13,7 @@ def main():
     u_0 = np.array([1.05, 0.]) 
     
     #Parameters for numerical integration and graphing
-    dt = 0.001
+    dt = 0.01
     t_final = 200
     method = "equal_rk4"
     plot_vars = [0, 1]
